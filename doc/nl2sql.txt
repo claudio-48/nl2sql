@@ -1,0 +1,34 @@
+Flusso di una domanda
+
+L’utente scrive in italiano, ad esempio “top 10 clienti per fatturato nel 2025”, nell’interfaccia Streamlit.
+L’orchestratore trasforma la domanda in un embedding tramite nomic-embed-text e interroga ChromaDB, che restituisce gli elementi di contesto più simili: tabelle, note sulle misure, esempi di query già validate.
+L’orchestratore compone il prompt (domanda e contesto recuperato) e lo invia a qwen2.5-coder:7b, che genera la query SQL.
+L’orchestratore controlla la query (solo SELECT, nessuna istruzione di modifica) e la esegue sul DW con psycopg2.
+Il risultato torna a Streamlit, che mostra tabella, grafico Plotly e la query SQL generata.
+
+Componenti
+
+Streamlit + Plotly: interfaccia web in Python con campo di domanda, tabella dei risultati e grafici interattivi. Streamlit consente di costruire un prototipo presentabile in poche decine di righe.
+
+Orchestratore NL2SQL: il codice Python che coordina i passaggi. È il punto in cui vivono la costruzione del prompt, i controlli di sicurezza sulla query e la gestione degli errori.
+
+ChromaDB: database vettoriale che conserva la conoscenza del DW in forma ricercabile per similarità semantica. È la parte RAG dell’architettura, la stessa logica su cui si basa Vanna.
+
+Conoscenza del DW: lo schema (DDL), le note di business (ad esempio cosa include “importo netto”) e le coppie domanda→SQL validate. È il materiale che determina più di ogni altro la qualità delle risposte e che migliora nel tempo.
+
+Ollama: runtime che esegue i modelli in locale, quindi nessun dato lascia l’infrastruttura.
+nomic-embed-text: modello di embedding, usato sia per indicizzare la conoscenza sia per confrontare ogni nuova domanda con essa.
+
+qwen2.5-coder:7b: modello generativo specializzato nel codice, che produce l’SQL a partire dal contesto.
+psycopg2: connettore PostgreSQL. L’utente di database dovrebbe avere permessi di sola lettura, idealmente su viste dedicate.
+
+Data Warehouse PostgreSQL: lo schema di analisi delle vendite per cliente, prodotto e periodo.
+
+Messaggi chiave per la presentazione
+
+Tutto in locale: nessun dato verso servizi esterni, argomento forte per clienti come gli enti pubblici.
+Trasparenza: la query SQL è sempre visibile accanto al risultato, quindi ogni numero è verificabile.
+Sicurezza: connessione di sola lettura più controllo sulle query generate.
+Costo contenuto: componenti open source e hardware ordinario.
+
+Un limite da dichiarare con onestà: un modello da 7 miliardi di parametri tende a sbagliare sulle query complesse (confronti tra periodi, percentuali, sottoquery). Per questo conviene presentare come passo successivo l’arricchimento degli esempi validati e, se serve, un test con un modello più grande.
