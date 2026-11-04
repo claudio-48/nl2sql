@@ -73,7 +73,7 @@ source venv/bin/activate
 
 ```bash
 pip install --upgrade pip
-pip install vanna streamlit pandas plotly psycopg2-binary
+pip install "vanna[chromadb,ollama,postgres]" pandas streamlit plotly psycopg2-binary
 ```
 
 ### 3. Configura ed avvia Ollama
@@ -82,7 +82,7 @@ Assicurati che Ollama sia installato ed avvia il download del modello di codice 
 
 ```bash
 # Scarica il modello LLM di generazione codice SQL
-ollama pull qwen2.5-coder:7b
+ollama run qwen2.5-coder:7b
 
 # Scarica il modello per la ricerca vettoriale RAG
 ollama pull nomic-embed-text

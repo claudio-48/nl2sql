@@ -1,0 +1,17 @@
+# In caso di upgrade di Python o di Linux può essere necessario ricostruire l'ambiente interattivo, ecco come procedere:
+
+# 1. Disattiva l'ambiente attuale (se attivo):
+deactivate
+
+# 2. Rimuovi la vecchia cartella del venv danneggiato:
+rm -rf venv
+
+# 3. Ricrea il virtual environment con l'interprete Python corrente di Debian 13:
+python3 -m venv venv
+
+# 4. Riattiva il nuovo venv:
+source venv/bin/activate
+
+#Aggiorna pip e reinstalla i pacchetti necessari (se hai un file requirements.txt, puoi usare direttamente quello):
+pip install --upgrade pip
+pip install "vanna[chromadb,ollama,postgres]" pandas streamlit plotly psycopg2-binary
